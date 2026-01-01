@@ -1,0 +1,15 @@
+{
+  "name": "Sunset Grill",
+  "hours": "Mon–Sun 8am–10pm",
+  "location": "Westlands, Nairobi",
+  "menu": {
+    "Burgers": [
+      { "name": "Cheeseburger", "price": 800 },
+      { "name": "Chicken Burger", "price": 900 }
+    ],
+    "Drinks": [
+      { "name": "Soda", "price": 200 },
+      { "name": "Water", "price": 100 }
+    ]
+  }
+}
