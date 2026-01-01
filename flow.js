@@ -1,4 +1,4 @@
-const config = require("./restaurant_config.json");
+const config = from ("./restaurant_config.json");
 const { sendMessage } = require("./whatsapp");
 const { getSession, clearSession } = require("./sessions");
 

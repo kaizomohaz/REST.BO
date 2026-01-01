@@ -1,32 +1,41 @@
-require("dotenv").config();
-const express = require("express");
-const bodyParser = require("body-parser");
-const { detectIntent } = require("./ai");
-const { handleFlow } = require("./flows");
+import express from "express";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
-app.use(bodyParser.json());
+app.use(express.json());
 
-app.get("/webhook", (req, res) => {
-  if (req.query["hub.verify_token"] === process.env.VERIFY_TOKEN) {
-    return res.send(req.query["hub.challenge"]);
-  }
-  res.sendStatus(403);
+/* HEALTH CHECK */
+app.get("/", (req, res) => {
+  res.send("API is live");
 });
 
-app.post("/webhook", async (req, res) => {
-  const msg = req.body.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
-  if (!msg) return res.sendStatus(200);
+/* WEBHOOK VERIFICATION (REQUIRED) */
+app.get("/webhook", (req, res) => {
+  const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 
-  const phone = msg.from;
-  const text = msg.text?.body;
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
 
-  const intent = await detectIntent(text);
-  await handleFlow(phone, intent, text);
+  if (mode === "subscribe" && token === VERIFY_TOKEN) {
+    console.log("✅ Webhook verified");
+    res.status(200).send(challenge);
+  } else {
+    console.log("❌ Webhook verification failed");
+    res.sendStatus(403);
+  }
+});
 
+/* WEBHOOK RECEIVER */
+app.post("/webhook", (req, res) => {
+  console.log("Incoming webhook:", JSON.stringify(req.body, null, 2));
   res.sendStatus(200);
 });
 
-app.listen(process.env.PORT, () =>
-  console.log("BOT RUNNING")
-);
+/* START SERVER */
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});

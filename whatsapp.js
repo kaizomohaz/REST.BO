@@ -1,12 +1,27 @@
-const axios = require("axios");
+import axios from "axios";
+import { getAIResponse } from "./ai.js";
 
-async function sendMessage(phone, text) {
+export async function handleIncomingMessage(body) {
+  const entry = body.entry?.[0];
+  const changes = entry?.changes?.[0];
+  const value = changes?.value;
+  const message = value?.messages?.[0];
+
+  if (!message) return;
+
+  const from = message.from;
+  const text = message.text?.body;
+
+  if (!text) return;
+
+  const reply = await getAIResponse(text);
+
   await axios.post(
-    `https://graph.facebook.com/v18.0/${process.env.PHONE_NUMBER_ID}/messages`,
+    `https://graph.facebook.com/v19.0/${process.env.PHONE_NUMBER_ID}/messages`,
     {
       messaging_product: "whatsapp",
-      to: phone,
-      text: { body: text }
+      to: from,
+      text: { body: reply }
     },
     {
       headers: {
@@ -16,5 +31,3 @@ async function sendMessage(phone, text) {
     }
   );
 }
-
-module.exports = { sendMessage };
